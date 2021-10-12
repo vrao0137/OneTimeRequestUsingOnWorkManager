@@ -4,14 +4,7 @@ public class UserModel {
     private int id;
     private int userId;
     private String title;
-    private boolean completed;
-
-    public UserModel(int id, int userId, String title, boolean completed) {
-        this.id = id;
-        this.userId = userId;
-        this.title = title;
-        this.completed = completed;
-    }
+    private String body;
 
     public int getId() {
         return id;
@@ -37,11 +30,18 @@ public class UserModel {
         this.title = title;
     }
 
-    public boolean isCompleted() {
-        return completed;
+    public String getBody() {
+        return body;
     }
 
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public UserModel(int id, int userId, String title, String body) {
+        this.id = id;
+        this.userId = userId;
+        this.title = title;
+        this.body = body;
     }
 }

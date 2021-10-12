@@ -23,9 +23,10 @@ import com.example.onetimerequestusingonworkmanager.databinding.ActivityMainBind
 public class MainActivity extends AppCompatActivity {
     private final String TAG = MainActivity.class.getSimpleName();
     private ActivityMainBinding binding;
-    Context context;
-    ApiInterface apiInterface;
+    private Context context;
     private OneTimeWorkRequest workRequest1, workRequest2;
+    private final String USER_TITLE = "userTitle";
+    private final String ID = "id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initialize() {
         context = this;
-        apiInterface = ApiClient.getClient().create(ApiInterface.class);
-
 
         binding.btnGetUser.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
 
                 Data.Builder data = new Data.Builder();
-                data.putInt("id", id);
+                data.putInt(ID, id);
                 workRequest1 = new OneTimeWorkRequest.Builder(MyFirstWorker.class).setInputData(data.build()).setConstraints(constraints).build();
                 workRequest2 = new OneTimeWorkRequest.Builder(MySecondWorker.class).build();
                 WorkManager.getInstance(context).beginWith(workRequest1).then(workRequest2).enqueue();
@@ -58,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                         .observe(MainActivity.this, new Observer<WorkInfo>() {
                             @Override
                             public void onChanged(WorkInfo workInfo) {
-                                String userTitle = workInfo.getOutputData().getString("userTitle");
+                                String userTitle = workInfo.getOutputData().getString(USER_TITLE);
                                 Log.e(TAG, "userTitle:- " + userTitle);
                                 binding.txtGetTitle.setText(userTitle + "\n");
                             }

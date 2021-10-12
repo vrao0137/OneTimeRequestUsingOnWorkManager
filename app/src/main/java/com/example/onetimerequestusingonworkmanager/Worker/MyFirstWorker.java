@@ -11,6 +11,7 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.example.onetimerequestusingonworkmanager.Comman.Constants;
 import com.example.onetimerequestusingonworkmanager.Comman.Notifications;
 import com.example.onetimerequestusingonworkmanager.Model.UserModel;
 import com.example.onetimerequestusingonworkmanager.R;
@@ -24,10 +25,11 @@ import retrofit2.Response;
 
 public class MyFirstWorker extends Worker {
     private final String TAG = MyFirstWorker.class.getSimpleName();
+    private Context mContext;
     private ApiInterface apiInterface;
     private Notifications notifications = new Notifications();
+
     private boolean onResponse = false;
-    private Context mContext;
 
     public MyFirstWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -37,22 +39,22 @@ public class MyFirstWorker extends Worker {
     @Override
     public Result doWork() {
         apiInterface = ApiClient.getClient().create(ApiInterface.class);
-        int userId = getInputData().getInt("id", 0);
+        int userId = getInputData().getInt(Constants.ID, 0);
         Log.e(TAG, "UserID:- " + userId);
 
         Data.Builder outputDataBuilder = new Data.Builder();
 
-        Call<UserModel> getUser = apiInterface.getUser(userId);
+        Call<UserModel> getUser = apiInterface.getPost(userId);
         try {
             Response<UserModel> response = getUser.execute();
             if (response.code() == 404) {
-                outputDataBuilder.putString("userTitle", "Data not Found");
+                outputDataBuilder.putString(Constants.USER_TITLE, Constants.DATA_NOT_FOUND);
                 onResponse = false;
-                notifications.createNotification("This is First WorkManager", "Data not Found", mContext);
+                notifications.createNotification(Constants.FIRST_WORKMANAGER, Constants.DATA_NOT_FOUND, mContext);
             }else if (response.code() == 200){
                 UserModel data = response.body();
                 onResponse = true;
-                outputDataBuilder.putString("userTitle", data.getTitle());
+                outputDataBuilder.putString(Constants.USER_TITLE, data.getTitle());
             } else {
                 return Result.retry();
             }
