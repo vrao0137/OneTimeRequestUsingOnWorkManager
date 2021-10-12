@@ -55,6 +55,7 @@ public class MyFirstWorker extends Worker {
                 UserModel data = response.body();
                 onResponse = true;
                 outputDataBuilder.putString(Constants.USER_TITLE, data.getTitle());
+                Log.e(TAG,"getTitle:- "+data.getTitle());
             } else {
                 return Result.retry();
             }

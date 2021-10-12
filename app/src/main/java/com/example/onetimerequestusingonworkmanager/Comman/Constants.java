@@ -18,7 +18,7 @@ public class Constants {
 
     // WorkManager key words
     public static final String USER_TITLE = "userTitle";
-    public static final String DATA_NOT_FOUND = "Data not Found";
+    public static final String DATA_NOT_FOUND = "Not Found";
     public static final String FIRST_WORKMANAGER = "This is First WorkManager";
 
     public static final String SECOND_WORKMANAGER = "This is Second WorkManager";
