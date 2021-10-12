@@ -1,8 +1,6 @@
 package com.example.onetimerequestusingonworkmanager;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,22 +8,24 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.work.Constraints;
+import androidx.work.Data;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import com.example.onetimerequestusingonworkmanager.Worker.MyWorker;
+import com.example.onetimerequestusingonworkmanager.Service.ApiClient;
+import com.example.onetimerequestusingonworkmanager.Service.ApiInterface;
+import com.example.onetimerequestusingonworkmanager.Worker.MyFirstWorker;
+import com.example.onetimerequestusingonworkmanager.Worker.MySecondWorker;
 import com.example.onetimerequestusingonworkmanager.databinding.ActivityMainBinding;
-
-import java.net.NetPermission;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = MainActivity.class.getSimpleName();
     private ActivityMainBinding binding;
     Context context;
+    ApiInterface apiInterface;
+    private OneTimeWorkRequest workRequest1, workRequest2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,29 +37,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void initialize()
-    {
+    private void initialize() {
         context = this;
+        apiInterface = ApiClient.getClient().create(ApiInterface.class);
 
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build();
 
-        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(MyWorker.class).setConstraints(constraints).build();
-        binding.btnPerformWork.setOnClickListener(new View.OnClickListener() {
+        binding.btnGetUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WorkManager.getInstance(context).enqueue(request);
+                int id = Integer.parseInt(binding.edtUserId.getText().toString());
+                Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
+
+                Data.Builder data = new Data.Builder();
+                data.putInt("id", id);
+                workRequest1 = new OneTimeWorkRequest.Builder(MyFirstWorker.class).setInputData(data.build()).setConstraints(constraints).build();
+                workRequest2 = new OneTimeWorkRequest.Builder(MySecondWorker.class).build();
+                WorkManager.getInstance(context).beginWith(workRequest1).then(workRequest2).enqueue();
+
+                WorkManager.getInstance(context).getWorkInfoByIdLiveData(workRequest1.getId())
+                        .observe(MainActivity.this, new Observer<WorkInfo>() {
+                            @Override
+                            public void onChanged(WorkInfo workInfo) {
+                                String userTitle = workInfo.getOutputData().getString("userTitle");
+                                Log.e(TAG, "userTitle:- " + userTitle);
+                                binding.txtGetTitle.setText(userTitle + "\n");
+                            }
+                        });
             }
         });
 
-        WorkManager.getInstance(context).getWorkInfoByIdLiveData(request.getId())
-                .observe(this, new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        String status = workInfo.getState().name();
-                        binding.txtWorkNote.setText(status +"\n");
-                    }
-                });
+
     }
 }
