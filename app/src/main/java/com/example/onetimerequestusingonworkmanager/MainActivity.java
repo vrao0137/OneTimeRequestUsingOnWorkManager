@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.work.Constraints;
 import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.ListenableWorker;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
@@ -24,6 +25,8 @@ import com.example.onetimerequestusingonworkmanager.Worker.MySecondWorker;
 import com.example.onetimerequestusingonworkmanager.databinding.ActivityMainBinding;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private Context context;
     private OneTimeWorkRequest workRequest1, workRequest2;
-    private final String USER_TITLE = "userTitle";
     private final String ID = "id";
 
     @Override
@@ -60,9 +62,22 @@ public class MainActivity extends AppCompatActivity {
 
                 Data.Builder data = new Data.Builder();
                 data.putInt(ID, id);
-                workRequest1 = new OneTimeWorkRequest.Builder(MyFirstWorker.class).setInputData(data.build()).setConstraints(constraints).build();
-                workRequest2 = new OneTimeWorkRequest.Builder(MySecondWorker.class).setConstraints(constraints).build();
-                WorkManager.getInstance(context).beginWith(workRequest1).then(workRequest2).enqueue();
+
+                workRequest1 = new OneTimeWorkRequest.Builder(MyFirstWorker.class).setInputData(data.build())
+                        .addTag(TAG)
+                        .setConstraints(constraints).build();
+                workRequest2 = new OneTimeWorkRequest.Builder(MySecondWorker.class)
+                        .setConstraints(constraints).build();
+                WorkManager workManager = WorkManager.getInstance(context);
+                workManager.beginWith(workRequest1).then(workRequest2).enqueue();
+
+                //If there is one pending, you can choose to let it run or replace it with your new work.
+                workManager.beginUniqueWork(
+                        TAG,
+                        ExistingWorkPolicy.REPLACE,
+                        workRequest1
+                ).enqueue();
+
 
                 /*WorkManager.getInstance(context).getWorkInfoByIdLiveData(workRequest1.getId())
                         .observe(MainActivity.this, new Observer<WorkInfo>() {

@@ -1,12 +1,8 @@
 package com.example.onetimerequestusingonworkmanager.Worker;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
@@ -14,12 +10,9 @@ import androidx.work.WorkerParameters;
 import com.example.onetimerequestusingonworkmanager.Comman.Constants;
 import com.example.onetimerequestusingonworkmanager.Comman.Notifications;
 import com.example.onetimerequestusingonworkmanager.Model.UserModel;
-import com.example.onetimerequestusingonworkmanager.R;
 import com.example.onetimerequestusingonworkmanager.Service.ApiClient;
 import com.example.onetimerequestusingonworkmanager.Service.ApiInterface;
-
 import java.io.IOException;
-
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -35,6 +28,7 @@ public class MyFirstWorker extends Worker {
         super(context, workerParams);
         this.mContext = context;
     }
+
 
     @Override
     public Result doWork() {
